@@ -70,8 +70,12 @@ int log_message_body(const char* format, ...) {
 
 int log_message_footer() { return LOG_WRITE_HANDLER("\n"); }
 
-int vlog_message(LogLevel level, const char* file, int line, const char* func,
-                 const char* format, va_list args) {
+int vlog_message(UNUSED LogLevel level, UNUSED const char* file,
+                 UNUSED int line, UNUSED const char* func,
+                 UNUSED const char* format, UNUSED va_list args) {
+#ifdef NDEBUG
+  return 0;
+#else
   /* Initializations */
   int ret = 0;
   int size = 0;
@@ -100,10 +104,14 @@ int vlog_message(LogLevel level, const char* file, int line, const char* func,
   }
 
   return ret;
+#endif /* NDEBUG */
 }
 
-int log_message(LogLevel level, const char* file, int line, const char* func,
-                const char* format, ...) {
+int log_message(UNUSED LogLevel level, UNUSED const char* file, UNUSED int line,
+                UNUSED const char* func, UNUSED const char* format, ...) {
+#ifdef NDEBUG
+  return 0;
+#else
   /* Initializations */
   va_list args;
   int ret = 0;
@@ -114,4 +122,5 @@ int log_message(LogLevel level, const char* file, int line, const char* func,
   va_end(args);
 
   return ret;
+#endif /* NDEBUG */
 }

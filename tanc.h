@@ -6,6 +6,11 @@
 
 #include "tanc.conf.h"
 
+/* GCC specific attributes */
+#define UNUSED __attribute__((unused))
+#define NORETURN __attribute__((noreturn))
+#define NODISCARD __attribute__((warn_unused_result))
+
 /* Polyfill for __func__ */
 #if __STDC_VERSION__ < 199901L
 #if __GNUC__ >= 2 && defined(__FUNCTION__)
@@ -138,6 +143,15 @@ int vlog_message(LogLevel level, const char* file, int line, const char* func,
 int log_message(LogLevel level, const char* file, int line, const char* func,
                 const char* format, ...);
 
+#ifdef NDEBUG
+#define LOG_TRACE(body)
+#define LOG_DEBUG(body)
+#define LOG_INFO(body)
+#define LOG_WARN(body)
+#define LOG_ERROR(body)
+#define LOG_FATAL(body)
+#else
+
 /**
  * @brief Log a message at the TRACE level.
  * @param body Body of the message. In the form of a printf format string and
@@ -223,5 +237,7 @@ int log_message(LogLevel level, const char* file, int line, const char* func,
       exit(EXIT_FAILURE);                                                \
     }                                                                    \
   } while (0)
+
+#endif /* NDEBUG */
 
 #endif /* __TANC_H__ */

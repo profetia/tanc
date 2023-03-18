@@ -17,3 +17,9 @@
  *  By default, this is set to LOG_LEVEL_INFO.
  */
 #define LOG_LEVEL LOG_LEVEL_INFO
+
+/**
+ * @brief Disable logging and assertions.
+ *  This will disable all logging macros and assert from <assert.h>.
+ */
+/* #define NDEBUG */
