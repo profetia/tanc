@@ -238,6 +238,8 @@ int log_message(LogLevel level, const char* file, int line, const char* func,
     }                                                                    \
   } while (0)
 
+#define DBG(format, expr) LOG_DEBUG((#expr " = " format, expr))
+
 #endif /* NDEBUG */
 
 #endif /* __TANC_H__ */

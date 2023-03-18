@@ -2,6 +2,7 @@
 
 int main(void) {
   eprintf("Hello, world!\n");
+  DBG("%d", 1 + 1);
   LOG_TRACE(("Hello, world!"));
   LOG_DEBUG(("Hello, world!"));
   LOG_INFO(("Hello, world!"));
