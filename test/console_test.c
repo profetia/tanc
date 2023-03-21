@@ -1,11 +1,11 @@
 #include "../tanc.h"
 
 int main(void) {
-  UNUSED int a = 1;
-  UNUSED __typeof__(a) b = (a++, 2);
+  UNUSED int a = BIN(11111111111111111111111111111111);
+  UNUSED typeof(a) b = (a++, 2);
 
   eprintf("Hello, world!\n");
-  if (DBG("%d", b == 2)) {
+  if (DBG("%d", b >> 1)) {
     eprintf("Hi, Mum!\n");
   }
 

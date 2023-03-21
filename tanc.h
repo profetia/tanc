@@ -5,6 +5,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "tanc.conf.h"
 
@@ -60,6 +61,84 @@ int eprintf(const char* format, ...) {
   /* Return */
   return ret;
 }
+
+/**
+ * @brief The smallest of two integers.
+ * @param a The first integer.
+ * @param b The second integer.
+ * @return int The smallest of the two integers.
+ */
+static int min(int a, int b) { return a < b ? a : b; }
+
+/**
+ * @brief Convert a binary string to an integer under two's complement. Returns
+ * 0 if the string is invalid. For strings longer than 32 bits, only the first
+ * 32 bits are used. For strings shorter than 32 bits, the string is assumed to
+ * be positive.
+ * @param bin Binary string.
+ * @return int Integer value.
+ * @note DO NOT CALL THIS FUNCTION DIRECTLY.
+ */
+int bin2int(const char* bin) {
+  /* Initializations */
+  int ret = 0;
+  int sign = 1;
+  size_t len = min(strlen(bin), 32);
+
+  /* Check for sign */
+  if (len == 32) { /* 32 bits, consider sign */
+    int i = 0;
+
+    /* Convert */
+    for (i = 1; i < len; i++) {
+      /* Check for invalid characters */
+      if (bin[i] != '1' && bin[i] != '0') {
+        return 0;
+      }
+
+      /* Perform conversion */
+      ret <<= 1;
+      ret += bin[i] - '0';
+    }
+
+    /* Check for invalid characters */
+    if (bin[0] != '1' && bin[0] != '0') {
+      return 0;
+    }
+
+    /* Check sign */
+    if (bin[0] == '1') {
+      ret -= (1 << 31);
+    }
+  } else { /* < 32 bits, default to positive */
+    int i = 0;
+
+    /* Convert */
+    for (i = 0; i < len; i++) {
+      /* Check for invalid characters */
+      if (bin[i] != '1' && bin[i] != '0') {
+        return 0;
+      }
+
+      /* Perform conversion */
+      ret <<= 1;
+      ret += bin[i] - '0';
+    }
+  }
+
+  /* Return */
+  return ret;
+}
+
+/**
+ * @brief Convert a binary string to an integer under two's complement. Returns
+ * 0 if the string is invalid. For strings longer than 32 bits, only the first
+ * 32 bits are used. For strings shorter than 32 bits, the string is assumed to
+ * be positive.
+ * @param bin Binary string.
+ * @return int Integer value.
+ */
+#define BIN(x) bin2int(#x)
 
 /**
  * @brief Levels of logging.
