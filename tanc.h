@@ -19,7 +19,12 @@
 #define __func__ __FUNCTION__
 #else /* !__GNUC__ */
 #define __func__ "<unknown>"
-#endif
+#endif /* __GNUC__ */
+#endif /* __STDC_VERSION__ */
+
+/* Polyfill for typeof */
+#if __STDC_VERSION__ < 199901L && defined(__GNUC__)
+#define typeof __typeof__
 #endif
 
 /**
