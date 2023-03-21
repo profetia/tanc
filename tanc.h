@@ -301,7 +301,7 @@ int log_message_footer() { return LOG_WRITE_HANDLER("\n"); }
 #define DBG(format, expr)                                                     \
   ((log_is_enabled(LOG_LEVEL_DEBUG)                                           \
         ? (log_message_header(LOG_LEVEL_DEBUG, __FILE__, __LINE__, __func__), \
-           LOG_WRITE_HANDLER(#expr " = " format, (expr)),                     \
+           LOG_WRITE_HANDLER(#expr " = " format " (%s)", (expr), format),     \
            log_message_footer())                                              \
         : 0),                                                                 \
    (expr))
