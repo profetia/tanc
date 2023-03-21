@@ -194,6 +194,11 @@ int log_message_header(LogLevel level, const char* file, int line,
  */
 int log_message_footer() { return LOG_WRITE_HANDLER("\n"); }
 
+/* Disable assertions if LOG_LEVEL is not DEBUG */
+#if LOG_LEVEL > TANC_LOG_LEVEL_DEBUG
+#define NDEBUG
+#endif
+
 /* Disable logging if LOG_LEVEL is NONE */
 #if LOG_LEVEL < TANC_LOG_LEVEL_NONE
 /**
