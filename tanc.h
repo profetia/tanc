@@ -13,6 +13,9 @@
 #define NORETURN __attribute__((noreturn))
 #define NODISCARD __attribute__((warn_unused_result))
 
+/* Common macros */
+#define STATIC_CAST(type, expr) ((type)(expr))
+
 /* Polyfill for __func__ */
 #if __STDC_VERSION__ < 199901L
 #if __GNUC__ >= 2 && defined(__FUNCTION__)
