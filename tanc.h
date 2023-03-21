@@ -112,6 +112,48 @@ static char* log_level_to_string(LogLevel level) {
   }
 }
 
+#ifndef LOG_WRITE_HANDLER
+#ifdef VLOG_WRITE_HANDLER
+
+/**
+ * @brief Log the message body.
+ * @param format Format string.
+ * @param args Arguments to format string.
+ * @return int Number of characters printed.
+ * @note Log level will not be checked. DO NOT CALL THIS FUNCTION DIRECTLY.
+ */
+int vlog_message(const char* format, va_list args) {
+  /* Write the message */
+  return VLOG_WRITE_HANDLER(format, args);
+}
+
+/**
+ * @brief Log the message body.
+ * @param format Format string.
+ * @param ... Arguments to format string.
+ * @return int Number of characters printed.
+ * @note Log level will not be checked. DO NOT CALL THIS FUNCTION DIRECTLY.
+ */
+int log_message(const char* format, ...) {
+  /* Initializations */
+  va_list args;
+  int ret = 0;
+
+  /* Write the message */
+  va_start(args, format);
+  ret = vlog_message(format, args);
+  va_end(args);
+
+  /* Return */
+  return ret;
+}
+
+#define LOG_WRITE_HANDLER log_message
+#else /* !VLOG_WRITE_HANDLER */
+#error "LOG_WRITE_HANDLER or VLOG_WRITE_HANDLER must be defined"
+#endif /* VLOG_WRITE_HANDLER */
+#endif /* !LOG_WRITE_HANDLER */
+
 /**
  * @brief Log the message header.
  * @param level Level of the message.
@@ -131,39 +173,6 @@ int log_message_header(LogLevel level, const char* file, int line,
 }
 
 /**
- * @brief Log the message body.
- * @param format Format string.
- * @param args Arguments to format string.
- * @return int Number of characters printed.
- * @note Log level will not be checked. DO NOT CALL THIS FUNCTION DIRECTLY.
- */
-int vlog_message_body(const char* format, va_list args) {
-  /* Write the message */
-  return VLOG_WRITE_HANDLER(format, args);
-}
-
-/**
- * @brief Log the message body.
- * @param format Format string.
- * @param ... Arguments to format string.
- * @return int Number of characters printed.
- * @note Log level will not be checked. DO NOT CALL THIS FUNCTION DIRECTLY.
- */
-int log_message_body(const char* format, ...) {
-  /* Initializations */
-  va_list args;
-  int ret = 0;
-
-  /* Write the message */
-  va_start(args, format);
-  ret = vlog_message_body(format, args);
-  va_end(args);
-
-  /* Return */
-  return ret;
-}
-
-/**
  * @brief Log the message footer.
  * @return int Number of characters printed.
  * @note Log level will not be checked. DO NOT CALL THIS FUNCTION DIRECTLY.
@@ -174,74 +183,6 @@ int log_message_footer() { return LOG_WRITE_HANDLER("\n"); }
 #ifndef NDEBUG
 
 /**
- * @brief Log a message.
- * @param level Level of the message.
- * @param file File where the message was logged.
- * @param line Line where the message was logged.
- * @param func Function where the message was logged.
- * @param format Format string.
- * @param args Arguments to format string.
- * @return int Number of characters printed.
- */
-int vlog_message(LogLevel level, const char* file, int line, const char* func,
-                 const char* format, va_list args) {
-  /* Initializations */
-  int ret = 0;
-  int size = 0;
-
-  /* Check if the log level is enabled */
-  if (!log_is_enabled(level)) {
-    return 0;
-  }
-
-  /* Write the message header */
-  size = log_message_header(level, file, line, func);
-  if (size > 0) {
-    ret += size;
-  }
-
-  /* Write the message */
-  size = vlog_message_body(format, args);
-  if (size > 0) {
-    ret += size;
-  }
-
-  /* Write the newline */
-  size = log_message_footer();
-  if (size > 0) {
-    ret += size;
-  }
-
-  /* Return */
-  return ret;
-}
-
-/**
- * @brief Log a message.
- * @param level Level of the message.
- * @param file File where the message was logged.
- * @param line Line where the message was logged.
- * @param func Function where the message was logged.
- * @param format Format string.
- * @param ... Arguments to format string.
- * @return int Number of characters printed.
- */
-int log_message(LogLevel level, const char* file, int line, const char* func,
-                const char* format, ...) {
-  /* Initializations */
-  va_list args;
-  int ret = 0;
-
-  /* Write the message */
-  va_start(args, format);
-  ret = vlog_message(level, file, line, func, format, args);
-  va_end(args);
-
-  /* Return */
-  return ret;
-}
-
-/**
  * @brief Log a message at the TRACE level.
  * @param body Body of the message. In the form of a printf format string and
  *  arguments, e.g. ("Hello %s", "world").
@@ -250,7 +191,7 @@ int log_message(LogLevel level, const char* file, int line, const char* func,
   do {                                                                   \
     if (log_is_enabled(LOG_LEVEL_TRACE)) { /* Check if is enabled */     \
       log_message_header(LOG_LEVEL_TRACE, __FILE__, __LINE__, __func__); \
-      log_message_body body;                                             \
+      LOG_WRITE_HANDLER body;                                            \
       log_message_footer();                                              \
     }                                                                    \
   } while (0)
@@ -264,7 +205,7 @@ int log_message(LogLevel level, const char* file, int line, const char* func,
   do {                                                                   \
     if (log_is_enabled(LOG_LEVEL_DEBUG)) { /* Check if is enabled */     \
       log_message_header(LOG_LEVEL_DEBUG, __FILE__, __LINE__, __func__); \
-      log_message_body body;                                             \
+      LOG_WRITE_HANDLER body;                                            \
       log_message_footer();                                              \
     }                                                                    \
   } while (0)
@@ -278,7 +219,7 @@ int log_message(LogLevel level, const char* file, int line, const char* func,
   do {                                                                  \
     if (log_is_enabled(LOG_LEVEL_INFO)) { /* Check if is enabled */     \
       log_message_header(LOG_LEVEL_INFO, __FILE__, __LINE__, __func__); \
-      log_message_body body;                                            \
+      LOG_WRITE_HANDLER body;                                           \
       log_message_footer();                                             \
     }                                                                   \
   } while (0)
@@ -292,7 +233,7 @@ int log_message(LogLevel level, const char* file, int line, const char* func,
   do {                                                                  \
     if (log_is_enabled(LOG_LEVEL_WARN)) { /* Check if is enabled */     \
       log_message_header(LOG_LEVEL_WARN, __FILE__, __LINE__, __func__); \
-      log_message_body body;                                            \
+      LOG_WRITE_HANDLER body;                                           \
       log_message_footer();                                             \
     }                                                                   \
   } while (0)
@@ -306,7 +247,7 @@ int log_message(LogLevel level, const char* file, int line, const char* func,
   do {                                                                   \
     if (log_is_enabled(LOG_LEVEL_ERROR)) { /* Check if is enabled */     \
       log_message_header(LOG_LEVEL_ERROR, __FILE__, __LINE__, __func__); \
-      log_message_body body;                                             \
+      LOG_WRITE_HANDLER body;                                            \
       log_message_footer();                                              \
     }                                                                    \
   } while (0)
@@ -321,7 +262,7 @@ int log_message(LogLevel level, const char* file, int line, const char* func,
   do {                                                                   \
     if (log_is_enabled(LOG_LEVEL_FATAL)) { /* Check if is enabled */     \
       log_message_header(LOG_LEVEL_FATAL, __FILE__, __LINE__, __func__); \
-      log_message_body body;                                             \
+      LOG_WRITE_HANDLER body;                                            \
       log_message_footer();                                              \
       exit(EXIT_FAILURE);                                                \
     }                                                                    \
@@ -335,19 +276,6 @@ int log_message(LogLevel level, const char* file, int line, const char* func,
 #define DBG(format, expr) LOG_DEBUG((#expr " = " format, expr))
 
 #else /* NDEBUG */
-
-/* Disable logging in release mode */
-int vlog_message(UNUSED LogLevel level, UNUSED const char* file,
-                 UNUSED int line, UNUSED const char* func,
-                 UNUSED const char* format, UNUSED va_list args) {
-  return 0;
-}
-
-/* Disable logging in release mode */
-int log_message(UNUSED LogLevel level, UNUSED const char* file, UNUSED int line,
-                UNUSED const char* func, UNUSED const char* format, ...) {
-  return 0;
-}
 
 #define LOG_TRACE(body)   /* Do nothing */
 #define LOG_DEBUG(body)   /* Do nothing */
