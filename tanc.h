@@ -1,6 +1,8 @@
 #ifndef __TANC_H__
 #define __TANC_H__
 
+#include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -59,14 +61,23 @@ int eprintf(const char* format, ...) {
  *  LOG_LEVEL_WARN:  3.
  *  LOG_LEVEL_ERROR: 4.
  *  LOG_LEVEL_FATAL: 5.
+ *  LOG_LEVEL_NONE:  6.
  */
 typedef enum LogLevel {
-  LOG_LEVEL_TRACE, /* TRACE */
-  LOG_LEVEL_DEBUG, /* DEBUG */
-  LOG_LEVEL_INFO,  /* INFO */
-  LOG_LEVEL_WARN,  /* WARN */
-  LOG_LEVEL_ERROR, /* ERROR */
-  LOG_LEVEL_FATAL  /* FATAL */
+  LOG_LEVEL_TRACE,             /* TRACE */
+#define TANC_LOG_LEVEL_TRACE 0 /* TRACE = 0 */
+  LOG_LEVEL_DEBUG,             /* DEBUG */
+#define TANC_LOG_LEVEL_DEBUG 1 /* DEBUG = 1 */
+  LOG_LEVEL_INFO,              /* INFO */
+#define TANC_LOG_LEVEL_INFO 2  /* INFO = 2 */
+  LOG_LEVEL_WARN,              /* WARN */
+#define TANC_LOG_LEVEL_WARN 3  /* WARN = 3 */
+  LOG_LEVEL_ERROR,             /* ERROR */
+#define TANC_LOG_LEVEL_ERROR 4 /* ERROR = 4 */
+  LOG_LEVEL_FATAL,             /* FATAL */
+#define TANC_LOG_LEVEL_FATAL 5 /* FATAL = 5 */
+  LOG_LEVEL_NONE               /* NONE */
+#define TANC_LOG_LEVEL_NONE 6  /* NONE = 6 */
 } LogLevel;
 
 /**
@@ -86,7 +97,7 @@ typedef int (*LogWriteHandler)(const char* format, ...);
  * @param level The log level to check
  * @return 1 if the log level is enabled, 0 otherwise
  */
-static int log_is_enabled(LogLevel level) { return level >= LOG_LEVEL; }
+int log_is_enabled(LogLevel level) { return level >= LOG_LEVEL; }
 
 /**
  * @brief Convert a log level to a string
@@ -107,11 +118,14 @@ static char* log_level_to_string(LogLevel level) {
       return "ERROR";
     case LOG_LEVEL_FATAL: /* FATAL */
       return "FATAL";
+    case LOG_LEVEL_NONE: /* NONE */
+      return "NONE";
     default: /* UNKNOWN */
       return "UNKNOWN";
   }
 }
 
+/* Polyfill for the optional VLOG_WRITE_HANDLER */
 #ifndef LOG_WRITE_HANDLER
 #ifdef VLOG_WRITE_HANDLER
 
@@ -148,6 +162,7 @@ int log_message(const char* format, ...) {
   return ret;
 }
 
+/* Define LOG_WRITE_HANDLER as the polyfill */
 #define LOG_WRITE_HANDLER log_message
 #else /* !VLOG_WRITE_HANDLER */
 #error "LOG_WRITE_HANDLER or VLOG_WRITE_HANDLER must be defined"
@@ -179,9 +194,8 @@ int log_message_header(LogLevel level, const char* file, int line,
  */
 int log_message_footer() { return LOG_WRITE_HANDLER("\n"); }
 
-/* Enabled only if NDEBUG is not defined */
-#ifndef NDEBUG
-
+/* Disable logging if LOG_LEVEL is NONE */
+#if LOG_LEVEL < TANC_LOG_LEVEL_NONE
 /**
  * @brief Log a message at the TRACE level.
  * @param body Body of the message. In the form of a printf format string and
@@ -275,7 +289,7 @@ int log_message_footer() { return LOG_WRITE_HANDLER("\n"); }
  */
 #define DBG(format, expr) LOG_DEBUG((#expr " = " format, expr))
 
-#else /* NDEBUG */
+#else /* LOG_LEVEL >= LOG_LEVEL_NONE */
 
 #define LOG_TRACE(body)   /* Do nothing */
 #define LOG_DEBUG(body)   /* Do nothing */
@@ -285,6 +299,6 @@ int log_message_footer() { return LOG_WRITE_HANDLER("\n"); }
 #define LOG_FATAL(body)   /* Do nothing */
 #define DBG(format, expr) /* Do nothing */
 
-#endif /* NDEBUG */
+#endif /* LOG_LEVEL < LOG_LEVEL_NONE */
 
 #endif /* __TANC_H__ */
