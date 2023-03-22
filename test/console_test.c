@@ -4,10 +4,14 @@ int main(void) {
   UNUSED int a = BIN(11111111111111111111111111111111);
   UNUSED typeof(a) b = (a++, 2);
 
+  /* assert(a != 0); */
+
   eprintf("Hello, world!\n");
   if (DBG("%d", b >> 1)) {
     eprintf("Hi, Mum!\n");
   }
+
+  DBGL("%d", b >> 1);
 
   LOG_TRACE(("Hello, world!"));
   LOG_DEBUG(("Hello, world!"));

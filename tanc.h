@@ -82,12 +82,11 @@ static int min(int a, int b) { return a < b ? a : b; }
 int bin2int(const char* bin) {
   /* Initializations */
   int ret = 0;
-  int sign = 1;
   size_t len = min(strlen(bin), 32);
 
   /* Check for sign */
   if (len == 32) { /* 32 bits, consider sign */
-    int i = 0;
+    size_t i = 0;
 
     /* Convert */
     for (i = 1; i < len; i++) {
@@ -111,7 +110,7 @@ int bin2int(const char* bin) {
       ret -= (1 << 31);
     }
   } else { /* < 32 bits, default to positive */
-    int i = 0;
+    size_t i = 0;
 
     /* Convert */
     for (i = 0; i < len; i++) {
@@ -362,7 +361,7 @@ int log_message_footer() { return LOG_WRITE_HANDLER("\n"); }
  * @brief Log a message at the FATAL level.
  * @param body Body of the message. In the form of a printf format string and
  * arguments, e.g. ("Hello %s", "world").
- * @note This macro will call exit(EXIT_FAILURE) after logging the message.
+ * @note This macro will call abort after logging the message.
  */
 #define LOG_FATAL(body)                                                  \
   do {                                                                   \
@@ -370,15 +369,14 @@ int log_message_footer() { return LOG_WRITE_HANDLER("\n"); }
       log_message_header(LOG_LEVEL_FATAL, __FILE__, __LINE__, __func__); \
       LOG_WRITE_HANDLER body;                                            \
       log_message_footer();                                              \
-      exit(EXIT_FAILURE);                                                \
+      abort();                                                           \
     }                                                                    \
   } while (0)
 
 /**
  * @brief Log a message at the DEBUG level, with the value of an expression.
  * @note This macro will return the value of the expression. It cannot be
- * discarded, so you have to use it in a statement. Otherwise, use LOG_DEBUG
- * instead.
+ * discarded, so you have to use it in a statement. Otherwise, use DBGL instead.
  */
 #define DBG(format, expr)                                                     \
   ((log_is_enabled(LOG_LEVEL_DEBUG)                                           \
@@ -387,6 +385,14 @@ int log_message_footer() { return LOG_WRITE_HANDLER("\n"); }
            log_message_footer())                                              \
         : 0),                                                                 \
    (expr))
+
+/**
+ * @brief Log a message at the DEBUG level, with the value of an expression.
+ * @note This macro will not return the value of the expression. It cannot be
+ * used in a statement. Otherwise, use DBG instead.
+ */
+#define DBGL(format, expr) \
+  LOG_DEBUG((#expr " = " format " (%s)", (expr), format))
 
 #else /* LOG_LEVEL >= LOG_LEVEL_NONE */
 
@@ -397,6 +403,7 @@ int log_message_footer() { return LOG_WRITE_HANDLER("\n"); }
 #define LOG_ERROR(body)          /* Do nothing */
 #define LOG_FATAL(body)          /* Do nothing */
 #define DBG(format, expr) (expr) /* Do nothing */
+#define DBGL(format, expr)       /* Do nothing */
 
 #endif /* LOG_LEVEL < LOG_LEVEL_NONE */
 
