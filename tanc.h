@@ -63,81 +63,78 @@ int eprintf(const char* format, ...) {
 }
 
 /**
- * @brief The smallest of two integers.
- * @param a The first integer.
- * @param b The second integer.
- * @return int The smallest of the two integers.
+ * @brief Remove underscores from a string.
+ * @param in The input string.
+ * @param out The output buffer.
+ * @param out_len The length of the output buffer.
+ * @return int 1 if the string was successfully converted, 0 otherwise.
  */
-static int min(int a, int b) { return a < b ? a : b; }
-
-/**
- * @brief Convert a binary string to an integer under two's complement. Returns
- * 0 if the string is invalid. For strings longer than 32 bits, only the first
- * 32 bits are used. For strings shorter than 32 bits, the string is assumed to
- * be positive.
- * @param bin Binary string.
- * @return int Integer value.
- * @note DO NOT CALL THIS FUNCTION DIRECTLY.
- */
-int bin2int(const char* bin) {
+static int remove_underscore(const char* in, char* out, size_t out_len) {
   /* Initializations */
-  int ret = 0;
-  size_t len = min(strlen(bin), 32);
+  size_t i = 0;
+  size_t j = 0;
+  size_t len = strlen(in);
 
-  /* Check for sign */
-  if (len == 32) { /* 32 bits, consider sign */
-    size_t i = 0;
+  /* Check for buffer overflow */
+  if (len + 1 > out_len) {
+    return 0;
+  }
 
-    /* Convert */
-    for (i = 1; i < len; i++) {
-      /* Check for invalid characters */
-      if (bin[i] != '1' && bin[i] != '0') {
-        return 0;
-      }
-
-      /* Perform conversion */
-      ret <<= 1;
-      ret += bin[i] - '0';
-    }
-
-    /* Check for invalid characters */
-    if (bin[0] != '1' && bin[0] != '0') {
-      return 0;
-    }
-
-    /* Check sign */
-    if (bin[0] == '1') {
-      ret -= (1 << 31);
-    }
-  } else { /* < 32 bits, default to positive */
-    size_t i = 0;
-
-    /* Convert */
-    for (i = 0; i < len; i++) {
-      /* Check for invalid characters */
-      if (bin[i] != '1' && bin[i] != '0') {
-        return 0;
-      }
-
-      /* Perform conversion */
-      ret <<= 1;
-      ret += bin[i] - '0';
+  /* Remove underscores */
+  for (i = 0; i < len; i++) {
+    if (in[i] != '_') {
+      out[j++] = in[i];
     }
   }
+
+  /* Terminate string */
+  out[j] = '\0';
+
+  /* Return */
+  return 1;
+}
+
+/**
+ * @brief Convert a string to an unsigned long using strtoul, but with support
+ * to underscores.
+ * @param str The string to convert.
+ * @param endptr Pointer to the end of the string.
+ * @param base The base to use.
+ * @return unsigned long The converted string.
+ */
+unsigned long strtoul_with_underscore(const char* str, char** endptr,
+                                      int base) {
+  /* Initializations */
+  char* buf = NULL;
+  unsigned long ret = 0;
+
+  /* Allocate buffer */
+  buf = (char*)calloc(strlen(str) + 1, sizeof(char));
+  if (buf == NULL) {
+    return 0;
+  }
+
+  /* Remove underscores */
+  if (!remove_underscore(str, buf, strlen(str) + 1)) {
+    free(buf);
+    return 0;
+  }
+
+  /* Convert string */
+  ret = strtoul(buf, endptr, base);
+
+  /* Free buffer */
+  free(buf);
 
   /* Return */
   return ret;
 }
 
 /**
- * @brief Convert a binary string to an integer under two's complement. Returns
- * 0 if the string is invalid. For strings longer than 32 bits, only the first
- * 32 bits are used. For strings shorter than 32 bits, the string is assumed to
- * be positive.
- * @param bin Binary string.
- * @return int Integer value.
+ * @brief Conert a binary string to an unsigned long, with support for
+ * underscores.
  */
-#define BIN(x) bin2int(#x)
+#define BIN(x) strtoul_with_underscore(#x, NULL, 2)
 
 /**
  * @brief Levels of logging.
