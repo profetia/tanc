@@ -131,10 +131,13 @@ unsigned long strtoul_with_underscore(const char* str, char** endptr,
 }
 
 /**
- * @brief Conert a binary string to an unsigned long, with support for
- * underscores.
+ * @brief Conert a binary, octal, hexadecimal or decimal string to an unsigned
+ * long, with support for underscores.
  */
 #define BIN(x) strtoul_with_underscore(#x, NULL, 2)
+#define OCT(x) strtoul_with_underscore(#x, NULL, 8)
+#define HEX(x) strtoul_with_underscore(#x, NULL, 16)
+#define DEC(x) strtoul_with_underscore(#x, NULL, 10)
 
 /**
  * @brief Levels of logging.
