@@ -1,4 +1,6 @@
+/* clang-format off */
 #include "libtanc/backtrace.h"
+/* clang-format on */
 
 #include <stdio.h>
 

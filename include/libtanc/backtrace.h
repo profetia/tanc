@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ucontext.h>
 
 /* Configure the backtrace module. */
 #define MAX_BACKTRACE_DEPTH 128
@@ -112,6 +111,10 @@ __attribute__((constructor)) void module_(backtrace)(init)(void) {
   sigaction(SIGFPE, &action, NULL);
 }
 
+/**
+ * @brief Print backtrace to stderr.
+ * @return
+ */
 #define backtrace_() tanc__backtrace__print_backtrace(stderr)
 
 /* Cleanup for the backtrace module. */
