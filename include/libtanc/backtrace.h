@@ -12,7 +12,9 @@
 
 /* Include the standard headers. */
 #include <execinfo.h>
+#include <inttypes.h>
 #include <signal.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,7 +22,6 @@
 
 /* Configure the backtrace module. */
 #define MAX_BACKTRACE_DEPTH 128
-#define MAX_BUFFER_SIZE 512
 
 /**
  * @brief Print a backtrace to the given `stream`.
@@ -32,24 +33,24 @@ __inline__ __attribute__((visibility("internal"))) void module_(backtrace)(
   /* Allocate a buffer for the backtrace. */
   void *buffer[MAX_BACKTRACE_DEPTH];
   /* Get the backtrace. */
-  int const depth = backtrace(buffer, MAX_BACKTRACE_DEPTH);
+  int32_t const depth = backtrace(buffer, MAX_BACKTRACE_DEPTH);
   /* Get the symbols for the backtrace. */
   char **symbols = backtrace_symbols(buffer, depth);
 
-  int i = 0;
+  int32_t i = 0;
 
   /* Start printing the backtrace. */
   fprintf(stream, "stack backtrace:\n");
   if (symbols == NULL) { /* Fallback to printing the addresses. */
     for (i = 0; i < depth; ++i) {
-      fprintf(stream, "    %d: %p\n", i, buffer[i]);
+      fprintf(stream, "    %" PRId32 ": %p\n", i, buffer[i]);
     }
     return;
   }
 
   /* Print the backtrace. */
   for (i = 0; i < depth; ++i) {
-    fprintf(stream, "    %d: %s\n", i, symbols[i]);
+    fprintf(stream, "    %" PRId32 ": %s\n", i, symbols[i]);
   }
 
   /* Free the symbols. */
@@ -66,11 +67,11 @@ __inline__ __attribute__((visibility("internal"))) void module_(backtrace)(
  * @return
  */
 __inline__ __attribute__((visibility("internal"))) void module_(backtrace)(
-    panic_handler)(char const *message, char const *file, int line,
+    panic_handler)(char const *message, char const *file, int32_t line,
                    char const *function) {
   /* Print the panic. */
-  fprintf(stderr, "thread panicked at '%s', %s:%d %s\n", message, file, line,
-          function);
+  fprintf(stderr, "thread panicked at '%s', %s:%" PRId32 " %s\n", message, file,
+          line, function);
   /* Print the backtrace. */
   module_(backtrace)(print_backtrace)(stderr);
   /* Abort the program. */
@@ -84,12 +85,12 @@ __inline__ __attribute__((visibility("internal"))) void module_(backtrace)(
  * @param uc The user context.
  * @return
  */
-void module_(backtrace)(signal_handler)(int signal, siginfo_t *info,
+void module_(backtrace)(signal_handler)(int32_t signal, siginfo_t *info,
                                         void *uc __attribute__((unused))) {
   /* Format the message. */
-  char message[MAX_BUFFER_SIZE];
-  snprintf(message, MAX_BUFFER_SIZE, "signal %d: %s at %p", signal,
-           strsignal(signal), info->si_addr);
+  char *message = NULL;
+  asprintf(&message, "signal %" PRId32 ": %s at %p", signal, strsignal(signal),
+           info->si_addr);
   /* Handle the panic. */
   module_(backtrace)(panic_handler)(message, __FILE__, __LINE__,
                                     __builtin_FUNCTION());
@@ -111,7 +112,6 @@ __attribute__((constructor)) void module_(backtrace)(init)(void) {
 }
 
 /* Cleanup for the backtrace module. */
-#undef MAX_BUFFER_SIZE
 #undef MAX_BACKTRACE_DEPTH
 
 /* clang-format off */
