@@ -8,6 +8,7 @@
 
 /* clang-format off */
 #include "libtanc/internal/polyfill.h"
+#include "libtanc/internal/module.h"
 /* clang-format on */
 
 /* Include the standard headers. */
@@ -28,8 +29,7 @@
  * @param stream The stream to print the backtrace to.
  * @return
  */
-__inline__ __attribute__((visibility("internal"))) void module_(backtrace)(
-    print_backtrace)(FILE *stream) {
+__inline__ void module_(backtrace)(print_backtrace)(FILE *stream) {
   /* Allocate a buffer for the backtrace. */
   void *buffer[MAX_BACKTRACE_DEPTH];
   /* Get the backtrace. */
@@ -66,9 +66,10 @@ __inline__ __attribute__((visibility("internal"))) void module_(backtrace)(
  * @param function The function of the panic.
  * @return
  */
-__inline__ __attribute__((visibility("internal"))) void module_(backtrace)(
-    panic_handler)(char const *message, char const *file, int32_t line,
-                   char const *function) {
+__inline__ void module_(backtrace)(panic_handler)(char const *message,
+                                                  char const *file,
+                                                  int32_t line,
+                                                  char const *function) {
   /* Print the panic. */
   fprintf(stderr, "thread panicked at '%s', %s:%" PRId32 " %s\n", message, file,
           line, function);
