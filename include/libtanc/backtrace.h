@@ -112,6 +112,8 @@ __attribute__((constructor)) void module_(backtrace)(init)(void) {
   sigaction(SIGFPE, &action, NULL);
 }
 
+#define backtrace_() tanc__backtrace__print_backtrace(stderr)
+
 /* Cleanup for the backtrace module. */
 #undef MAX_BACKTRACE_DEPTH
 
