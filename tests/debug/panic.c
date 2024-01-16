@@ -1,5 +1,4 @@
-
-#include "libtanc/debug.h"
+#include "libtanc.h"
 
 void bad_function(void) {
   char *p = (char *)0xdeadbeef;

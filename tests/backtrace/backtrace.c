@@ -1,12 +1,13 @@
-
+/* clang-format off */
 #include "libtanc.h"
+/* clang-format on */
 
-void bad_function(void) {
-  char *p = (char *)0xdeadbeef;
-  todo_(("Fuck %p", p));
+#include <stdio.h>
+
+void dummy_function(void) {
+  backtrace_();
+  printf("%s:%d %s\n", __FILE__, __LINE__, __builtin_FUNCTION());
 }
-
-void dummy_function(void) { bad_function(); }
 
 void dummy_caller(void (*fn)(void)) { fn(); }
 

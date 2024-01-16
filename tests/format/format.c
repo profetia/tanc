@@ -1,5 +1,5 @@
 /* clang-format off */
-#include "libtanc/format.h"
+#include "libtanc.h"
 /* clang-format on */
 
 #include <stdio.h>
