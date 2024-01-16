@@ -28,7 +28,7 @@
  * @param stream The stream to print the backtrace to.
  * @return
  */
-__inline__ void module_(backtrace)(print_backtrace)(FILE *stream) {
+inline void module_(backtrace)(print_backtrace)(FILE *stream) {
   /* Allocate a buffer for the backtrace. */
   void *buffer[MAX_BACKTRACE_DEPTH];
   /* Get the backtrace. */
@@ -65,10 +65,9 @@ __inline__ void module_(backtrace)(print_backtrace)(FILE *stream) {
  * @param function The function of the panic.
  * @return
  */
-__inline__ void module_(backtrace)(panic_handler)(char const *message,
-                                                  char const *file,
-                                                  int32_t line,
-                                                  char const *function) {
+inline void module_(backtrace)(panic_handler)(char const *message,
+                                              char const *file, int32_t line,
+                                              char const *function) {
   /* Print the panic. */
   fprintf(stderr, "thread panicked at '%s', %s:%" PRId32 " %s\n", message, file,
           line, function);
@@ -92,8 +91,7 @@ void module_(backtrace)(signal_handler)(int32_t signal, siginfo_t *info,
   asprintf(&message, "signal %" PRId32 ": %s at %p", signal, strsignal(signal),
            info->si_addr);
   /* Handle the panic. */
-  module_(backtrace)(panic_handler)(message, __FILE__, __LINE__,
-                                    __builtin_FUNCTION());
+  module_(backtrace)(panic_handler)(message, __FILE__, __LINE__, __func__);
 }
 
 /**

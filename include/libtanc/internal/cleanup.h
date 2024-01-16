@@ -15,6 +15,27 @@
 #undef LIBTANC_POLYFILL__USE_GNU
 #endif /* __USE_GNU */
 
+/* Cleanup for the polyfill of typeof. */
+#ifdef LIBTANC_POLYFILL_typeof
+#undef typeof
+/* Unmark typeof as polyfilled */
+#undef LIBTANC_POLYFILL_typeof
+#endif /* typeof */
+
+/* Cleanup for the polyfill of inline. */
+#ifdef LIBTANC_POLYFILL_inline
+#undef inline
+/* Unmark inline as polyfilled */
+#undef LIBTANC_POLYFILL_inline
+#endif /* inline */
+
+/* Cleanup for the polyfill of __func__. */
+#ifdef LIBTANC_POLYFILL___func__
+#undef __func__
+/* Unmark __func__ as polyfilled */
+#undef LIBTANC_POLYFILL___func__
+#endif /* __func__ */
+
 #undef LIBTANC_INTERNAL_POLYFILL_H
 #endif /* LIBTANC_INTERNAL_POLYFILL_H */
 

@@ -22,7 +22,7 @@
  * @return The formatted string. It is the caller's responsibility to free the
  *        string.
  */
-__inline__ __attribute__((format(printf, 1, 2))) char* module_(format)(format)(
+inline __attribute__((format(printf, 1, 2))) char* module_(format)(format)(
     char const* fmt, ...) {
   /* Variadic argument list */
   va_list args;
@@ -41,7 +41,7 @@ __inline__ __attribute__((format(printf, 1, 2))) char* module_(format)(format)(
  * @param ... The variadic argument list.
  * @return
  */
-__inline__ __attribute__((format(printf, 1, 2))) void module_(format)(print)(
+inline __attribute__((format(printf, 1, 2))) void module_(format)(print)(
     char const* fmt, ...) {
   /* Variadic argument list */
   va_list args;
@@ -58,7 +58,7 @@ __inline__ __attribute__((format(printf, 1, 2))) void module_(format)(print)(
  * @param ... The variadic argument list.
  * @return
  */
-__inline__ __attribute__((format(printf, 1, 2))) void module_(format)(eprint)(
+inline __attribute__((format(printf, 1, 2))) void module_(format)(eprint)(
     char const* fmt, ...) {
   /* Variadic argument list */
   va_list args;
