@@ -10,7 +10,6 @@ void bad_function(void) {
 }
 
 void dummy_function(void) {
-  backtrace_();
   printf("%s:%d %s\n", __FILE__, __LINE__, function_());
   bad_function();
 }
